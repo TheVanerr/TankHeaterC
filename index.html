@@ -1,346 +1,47 @@
 <!doctype html>
-<html lang="tr" class="h-full">
- <head>
+<html lang="tr">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tank Isıtıcı Hesaplayıcı</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta http-equiv="refresh" content="0; url=tankheat.html">
+  <title>Yönlendiriliyor...</title>
   <style>
-    * { font-family: 'Space Grotesk', sans-serif; }
-    .gradient-bg {
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
-    .card-glass {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    .loader {
+      text-align: center;
     }
-    .input-style {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      transition: all 0.3s ease;
+    .spinner {
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
     }
-    .input-style:focus {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      transition: all 0.3s ease;
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
-    }
-    .result-glow {
-      box-shadow: 0 0 40px rgba(34, 197, 94, 0.2);
-    }
-    .nav-btn {
-      transition: all 0.3s ease;
-    }
-    .nav-btn.active {
-      background: rgba(59, 130, 246, 0.3);
-      border-color: #3b82f6;
-    }
-    .formula-box {
-      background: rgba(0, 0, 0, 0.3);
-      font-family: 'Courier New', monospace;
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
-  <style>body { box-sizing: border-box; }</style>
- </head>
- <body class="h-full gradient-bg text-white overflow-auto">
-  <div class="min-h-full w-full p-4 md:p-8"><!-- Header -->
-   <header class="text-center mb-8">
-    <h1 id="app-title" class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">🔥 Tank Isıtıcı Hesaplayıcı</h1>
-    <p class="text-gray-400 mt-2">Endüstriyel tank ısıtma gücü hesaplama aracı</p>
-   </header><!-- Navigation -->
-   <nav class="flex justify-center gap-4 mb-8"><button id="nav-calc" class="nav-btn active px-6 py-3 rounded-xl border border-white/20 text-white font-medium" onclick="showPage('calculator')"> 📊 Hesaplama </button> <button id="nav-formula" class="nav-btn px-6 py-3 rounded-xl border border-white/20 text-white font-medium" onclick="showPage('formulas')"> 📐 Formüller </button>
-   </nav><!-- Calculator Page -->
-   <div id="page-calculator" class="max-w-2xl mx-auto">
-    <div class="card-glass rounded-2xl p-6 md:p-8">
-     <h2 class="text-xl font-semibold mb-6 flex items-center gap-2"><span class="text-2xl">⚙️</span> Parametreler</h2>
-     <div class="grid gap-5"><!-- Toplam Sıvı Miktarı -->
-      <div><label class="block text-sm text-gray-300 mb-2">Toplam Sıvı Miktarı (Litre)</label> <input type="number" id="volume" placeholder="Örn: 1000" min="0" step="any" class="input-style w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none">
-      </div><!-- Kimyasal Oranı -->
-      <div><label class="block text-sm text-gray-300 mb-2">Kimyasal Oranı (% - Yoksa 0 girin)</label> <input type="number" id="chemical-ratio" placeholder="Örn: 20" min="0" max="100" step="any" value="0" class="input-style w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none">
-       <p class="text-xs text-gray-500 mt-1">💡 Saf su için 0, %20 kimyasal için 20 girin</p>
-      </div><!-- İlk Sıcaklık -->
-      <div><label class="block text-sm text-gray-300 mb-2">Başlangıç Sıcaklığı (°C)</label> <input type="number" id="temp-start" placeholder="Örn: 20" step="any" class="input-style w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none">
-      </div><!-- Son Sıcaklık -->
-      <div><label class="block text-sm text-gray-300 mb-2">Hedef Sıcaklık (°C)</label> <input type="number" id="temp-end" placeholder="Örn: 80" step="any" class="input-style w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none">
-      </div><!-- Isınma Süresi -->
-      <div><label class="block text-sm text-gray-300 mb-2">Isınma Süresi (Dakika)</label> <input type="number" id="time" placeholder="Örn: 60" min="0" step="any" class="input-style w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none">
-      </div><!-- Hesapla Butonu --> <button onclick="calculate()" class="btn-primary w-full py-4 rounded-xl text-white font-semibold text-lg mt-4"> 🔥 Isıtıcı Gücünü Hesapla </button>
-     </div><!-- Sonuç Alanı -->
-     <div id="result-container" class="hidden mt-8">
-      <div class="result-glow card-glass rounded-2xl p-6 border border-green-500/30">
-       <h3 class="text-lg font-medium text-green-400 mb-4 flex items-center gap-2"><span class="text-2xl">✅</span> Hesaplama Sonucu</h3>
-       <div class="space-y-4"><!-- Ana Sonuç -->
-        <div class="bg-green-500/10 rounded-xl p-4 text-center">
-         <p class="text-gray-400 text-sm mb-1">Gereken Isıtıcı Gücü</p>
-         <p id="result-power" class="text-4xl font-bold text-green-400">0 kW</p>
-        </div><!-- Detaylar -->
-        <div class="grid grid-cols-2 gap-3 text-sm">
-         <div class="bg-white/5 rounded-lg p-3">
-          <p class="text-gray-400">Toplam Kütle</p>
-          <p id="result-mass" class="text-white font-medium">0 kg</p>
-         </div>
-         <div class="bg-white/5 rounded-lg p-3">
-          <p class="text-gray-400">Özgül Isı (Karışım)</p>
-          <p id="result-cp" class="text-white font-medium">0 J/kg·K</p>
-         </div>
-         <div class="bg-white/5 rounded-lg p-3">
-          <p class="text-gray-400">Sıcaklık Farkı</p>
-          <p id="result-dt" class="text-white font-medium">0 °C</p>
-         </div>
-         <div class="bg-white/5 rounded-lg p-3">
-          <p class="text-gray-400">Toplam Enerji</p>
-          <p id="result-energy" class="text-white font-medium">0 kJ</p>
-         </div>
-        </div><!-- Uyarı -->
-        <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
-         <p class="text-amber-400">⚠️ <strong>Not:</strong> Bu hesaplama ısı kayıplarını içermez. Gerçek uygulamada %10-30 güvenlik payı ekleyin.</p>
-        </div>
-       </div>
-      </div>
-     </div><!-- Hata Mesajı -->
-     <div id="error-container" class="hidden mt-6">
-      <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400">
-       <p id="error-message" class="flex items-center gap-2"><span>❌</span> <span>Hata mesajı</span></p>
-      </div>
-     </div>
-    </div>
-   </div><!-- Formulas Page -->
-   <div id="page-formulas" class="max-w-3xl mx-auto hidden">
-    <div class="card-glass rounded-2xl p-6 md:p-8">
-     <h2 class="text-xl font-semibold mb-6 flex items-center gap-2"><span class="text-2xl">📐</span> Kullanılan Formüller</h2>
-     <div class="space-y-6"><!-- Ana Formül -->
-      <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-5">
-       <h3 class="text-lg font-medium text-blue-400 mb-3">1. Isıtıcı Gücü Formülü</h3>
-       <div class="formula-box rounded-lg p-4 text-center text-lg text-cyan-300">
-        P = Q / t = (m × Cp × ΔT) / t
-       </div>
-       <div class="mt-4 text-sm text-gray-300 space-y-1">
-        <p><strong class="text-white">P</strong> = Güç (Watt)</p>
-        <p><strong class="text-white">Q</strong> = Toplam ısı enerjisi (Joule)</p>
-        <p><strong class="text-white">m</strong> = Kütle (kg)</p>
-        <p><strong class="text-white">Cp</strong> = Özgül ısı kapasitesi (J/kg·K)</p>
-        <p><strong class="text-white">ΔT</strong> = Sıcaklık farkı (°C veya K)</p>
-        <p><strong class="text-white">t</strong> = Süre (saniye)</p>
-       </div>
-      </div><!-- Kütle Hesabı -->
-      <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-5">
-       <h3 class="text-lg font-medium text-purple-400 mb-3">2. Kütle Hesabı</h3>
-       <div class="formula-box rounded-lg p-4 text-center text-lg text-cyan-300">
-        m = V × ρ
-       </div>
-       <div class="mt-4 text-sm text-gray-300 space-y-1">
-        <p><strong class="text-white">m</strong> = Kütle (kg)</p>
-        <p><strong class="text-white">V</strong> = Hacim (m³) → Litre / 1000</p>
-        <p><strong class="text-white">ρ</strong> = Yoğunluk (kg/m³)</p>
-       </div>
-       <div class="mt-3 bg-white/5 rounded-lg p-3 text-sm">
-        <p class="text-gray-400">Kullanılan Değerler:</p>
-        <p>• Su yoğunluğu: <span class="text-white">1000 kg/m³</span></p>
-        <p>• Kimyasal yoğunluğu: <span class="text-white">1100 kg/m³</span> (varsayılan)</p>
-       </div>
-      </div><!-- Karışım Özgül Isısı -->
-      <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-5">
-       <h3 class="text-lg font-medium text-green-400 mb-3">3. Karışım Özgül Isı Kapasitesi</h3>
-       <div class="formula-box rounded-lg p-4 text-center text-lg text-cyan-300">
-        Cp_mix = (x × Cp_chem) + ((1-x) × Cp_water)
-       </div>
-       <div class="mt-4 text-sm text-gray-300 space-y-1">
-        <p><strong class="text-white">Cp_mix</strong> = Karışımın özgül ısısı (J/kg·K)</p>
-        <p><strong class="text-white">x</strong> = Kimyasal oranı (0-1 arası)</p>
-        <p><strong class="text-white">Cp_chem</strong> = Kimyasalın özgül ısısı</p>
-        <p><strong class="text-white">Cp_water</strong> = Suyun özgül ısısı</p>
-       </div>
-       <div class="mt-3 bg-white/5 rounded-lg p-3 text-sm">
-        <p class="text-gray-400">Kullanılan Değerler:</p>
-        <p>• Su özgül ısısı: <span class="text-white">4186 J/kg·K</span></p>
-        <p>• Kimyasal özgül ısısı: <span class="text-white">2500 J/kg·K</span> (varsayılan - tipik endüstriyel kimyasal)</p>
-       </div>
-      </div><!-- Karışım Yoğunluğu -->
-      <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-5">
-       <h3 class="text-lg font-medium text-amber-400 mb-3">4. Karışım Yoğunluğu</h3>
-       <div class="formula-box rounded-lg p-4 text-center text-lg text-cyan-300">
-        ρ_mix = (x × ρ_chem) + ((1-x) × ρ_water)
-       </div>
-       <div class="mt-4 text-sm text-gray-300 space-y-1">
-        <p><strong class="text-white">ρ_mix</strong> = Karışımın yoğunluğu (kg/m³)</p>
-        <p><strong class="text-white">x</strong> = Kimyasal oranı (0-1 arası)</p>
-       </div>
-      </div><!-- Birim Dönüşümleri -->
-      <div class="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-5">
-       <h3 class="text-lg font-medium text-cyan-400 mb-3">5. Birim Dönüşümleri</h3>
-       <div class="grid md:grid-cols-2 gap-3 text-sm">
-        <div class="formula-box rounded-lg p-3 text-cyan-300">
-         Hacim: V(m³) = V(L) / 1000
-        </div>
-        <div class="formula-box rounded-lg p-3 text-cyan-300">
-         Süre: t(s) = t(dk) × 60
-        </div>
-        <div class="formula-box rounded-lg p-3 text-cyan-300">
-         Güç: P(kW) = P(W) / 1000
-        </div>
-        <div class="formula-box rounded-lg p-3 text-cyan-300">
-         Enerji: Q(kJ) = Q(J) / 1000
-        </div>
-       </div>
-      </div><!-- Örnek Hesaplama -->
-      <div class="bg-white/5 border border-white/20 rounded-xl p-5">
-       <h3 class="text-lg font-medium text-white mb-3">📝 Örnek Hesaplama</h3>
-       <div class="text-sm text-gray-300 space-y-2">
-        <p><strong class="text-blue-400">Veriler:</strong> 1000 L saf su, 20°C → 80°C, 60 dakikada</p>
-        <div class="formula-box rounded-lg p-3 mt-3 space-y-1 text-cyan-300">
-         <p>m = 1000 L × (1 m³/1000 L) × 1000 kg/m³ = <strong>1000 kg</strong></p>
-         <p>ΔT = 80 - 20 = <strong>60°C</strong></p>
-         <p>t = 60 dk × 60 = <strong>3600 s</strong></p>
-         <p>Q = 1000 × 4186 × 60 = <strong>251,160,000 J</strong></p>
-         <p>P = 251,160,000 / 3600 = <strong>69,766 W ≈ 69.77 kW</strong></p>
-        </div>
-       </div>
-      </div><!-- Notlar -->
-      <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-5">
-       <h3 class="text-lg font-medium text-red-400 mb-3">⚠️ Önemli Notlar</h3>
-       <ul class="text-sm text-gray-300 space-y-2 list-disc list-inside">
-        <li>Bu hesaplama <strong>ideal koşulları</strong> varsayar (ısı kaybı yok)</li>
-        <li>Gerçek uygulamada tank yüzeyinden, boru hatlarından ısı kaybı olur</li>
-        <li>Güvenlik payı olarak hesaplanan değere <strong>%10-30</strong> ekleyin</li>
-        <li>Kimyasal özellikleri (yoğunluk, özgül ısı) gerçek değerlerle değişebilir</li>
-        <li>Yüksek sıcaklıklarda buharlaşma kayıpları da dikkate alınmalıdır</li>
-       </ul>
-      </div>
-     </div>
-    </div>
-   </div><!-- Footer -->
-   <footer class="text-center text-gray-500 text-sm mt-8 pb-4">
-    <p>🔬 Termodinamik hesaplama aracı</p>
-   </footer>
+</head>
+<body>
+  <div class="loader">
+    <div class="spinner"></div>
+    <p>Yönlendiriliyor...</p>
   </div>
   <script>
-    // Sabitler
-    const WATER_DENSITY = 1000; // kg/m³
-    const CHEMICAL_DENSITY = 1100; // kg/m³ (varsayılan)
-    const WATER_CP = 4186; // J/kg·K
-    const CHEMICAL_CP = 2500; // J/kg·K (varsayılan)
-
-    // Sayfa değiştirme
-    function showPage(page) {
-      const calcPage = document.getElementById('page-calculator');
-      const formulaPage = document.getElementById('page-formulas');
-      const navCalc = document.getElementById('nav-calc');
-      const navFormula = document.getElementById('nav-formula');
-
-      if (page === 'calculator') {
-        calcPage.classList.remove('hidden');
-        formulaPage.classList.add('hidden');
-        navCalc.classList.add('active');
-        navFormula.classList.remove('active');
-      } else {
-        calcPage.classList.add('hidden');
-        formulaPage.classList.remove('hidden');
-        navCalc.classList.remove('active');
-        navFormula.classList.add('active');
-      }
-    }
-
-    // Hata göster
-    function showError(message) {
-      const errorContainer = document.getElementById('error-container');
-      const errorMessage = document.getElementById('error-message');
-      const resultContainer = document.getElementById('result-container');
-      
-      errorMessage.innerHTML = `<span>❌</span> <span>${message}</span>`;
-      errorContainer.classList.remove('hidden');
-      resultContainer.classList.add('hidden');
-    }
-
-    // Hata gizle
-    function hideError() {
-      document.getElementById('error-container').classList.add('hidden');
-    }
-
-    // Hesaplama fonksiyonu
-    function calculate() {
-      hideError();
-
-      // Değerleri al
-      const volume = parseFloat(document.getElementById('volume').value);
-      const chemicalRatio = parseFloat(document.getElementById('chemical-ratio').value) / 100;
-      const tempStart = parseFloat(document.getElementById('temp-start').value);
-      const tempEnd = parseFloat(document.getElementById('temp-end').value);
-      const timeMinutes = parseFloat(document.getElementById('time').value);
-
-      // Validasyon
-      if (isNaN(volume) || volume <= 0) {
-        showError('Lütfen geçerli bir sıvı miktarı girin (0\'dan büyük)');
-        return;
-      }
-      if (isNaN(chemicalRatio) || chemicalRatio < 0 || chemicalRatio > 1) {
-        showError('Kimyasal oranı 0-100 arasında olmalıdır');
-        return;
-      }
-      if (isNaN(tempStart)) {
-        showError('Lütfen başlangıç sıcaklığını girin');
-        return;
-      }
-      if (isNaN(tempEnd)) {
-        showError('Lütfen hedef sıcaklığı girin');
-        return;
-      }
-      if (tempEnd <= tempStart) {
-        showError('Hedef sıcaklık, başlangıç sıcaklığından büyük olmalıdır');
-        return;
-      }
-      if (isNaN(timeMinutes) || timeMinutes <= 0) {
-        showError('Lütfen geçerli bir süre girin (0\'dan büyük)');
-        return;
-      }
-
-      // Hesaplamalar
-      // 1. Karışım yoğunluğu
-      const mixDensity = (chemicalRatio * CHEMICAL_DENSITY) + ((1 - chemicalRatio) * WATER_DENSITY);
-      
-      // 2. Hacim (m³)
-      const volumeM3 = volume / 1000;
-      
-      // 3. Kütle (kg)
-      const mass = volumeM3 * mixDensity;
-      
-      // 4. Karışım özgül ısısı
-      const mixCp = (chemicalRatio * CHEMICAL_CP) + ((1 - chemicalRatio) * WATER_CP);
-      
-      // 5. Sıcaklık farkı
-      const deltaT = tempEnd - tempStart;
-      
-      // 6. Süre (saniye)
-      const timeSeconds = timeMinutes * 60;
-      
-      // 7. Toplam enerji (Joule)
-      const totalEnergy = mass * mixCp * deltaT;
-      
-      // 8. Güç (Watt)
-      const powerWatts = totalEnergy / timeSeconds;
-      
-      // 9. Güç (kW)
-      const powerKW = powerWatts / 1000;
-
-      // Sonuçları göster
-      document.getElementById('result-power').textContent = `${powerKW.toFixed(2)} kW`;
-      document.getElementById('result-mass').textContent = `${mass.toFixed(2)} kg`;
-      document.getElementById('result-cp').textContent = `${mixCp.toFixed(0)} J/kg·K`;
-      document.getElementById('result-dt').textContent = `${deltaT.toFixed(1)} °C`;
-      document.getElementById('result-energy').textContent = `${(totalEnergy / 1000).toFixed(2)} kJ`;
-
-      document.getElementById('result-container').classList.remove('hidden');
-    }
-
-
+    window.location.href = 'tankheat.html';
   </script>
 </body>
 </html>
